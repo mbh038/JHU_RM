@@ -1,0 +1,92 @@
+---
+title: "JHU_RM_Quiz2"
+author: "mbh038"
+date: "Monday, June 08, 2015"
+output: html_document
+---
+
+##Question One
+
+Consider the following data with x as the predictor and y as as the outcome.
+
+x <- c(0.61, 0.93, 0.83, 0.35, 0.54, 0.16, 0.91, 0.62, 0.62)
+y <- c(0.67, 0.84, 0.6, 0.18, 0.85, 0.47, 1.1, 0.65, 0.36)
+Give a P-value for the two sided hypothesis test of whether ??1 from a linear regression model is 0 or not.
+
+2.325
+0.391
+__0.05296__
+0.025
+
+```{r q1}
+# find this manually 
+
+x <- c(0.61, 0.93, 0.83, 0.35, 0.54, 0.16, 0.91, 0.62, 0.62)
+y <- c(0.67, 0.84, 0.6, 0.18, 0.85, 0.47, 1.1, 0.65, 0.36)
+
+n<-length(y)
+
+beta1<-cor(y,x)*sd(y)/sd(x)
+beta0<-mean(y)-beta1*mean(x)
+
+# residuals
+e<-y-beta0-beta1*x
+
+# sd around the regression line
+sigma<-sqrt(sum(e^2)/(n-2))
+sigma
+
+# sums of x differences squared
+ssx=sum((x-mean(x))^2)
+
+#find errors
+seBeta0<-(1/n+mean(x)^2/ssx)^.5*sigma
+seBeta1<-sigma/sqrt(ssx)
+
+#find t values
+tBeta0<-beta0/seBeta0
+tBeta1<-beta1/seBeta1
+
+pBeta0<-2*pt(abs(tBeta0),df=n-2,lower.tail=FALSE)
+pBeta1<-2*pt(abs(tBeta1),df=n-2,lower.tail=FALSE)
+
+# coefficient table
+coefTable<-rbind(c(beta0,seBeta0,tBeta0,pBeta0),
+                 c(beta1,seBeta1,tBeta1,pBeta1))
+colnames(coefTable)<-c("Estimate","Std. Error","t value","P(>|t|)")
+rownames(coefTable)<-c("(Intercept)","x")
+coefTable
+
+```
+Now do this using the lm function
+```{r q1 lm fit}
+fit<-lm(y~x)
+summary(fit)$coefficients
+```
+
+```{r q1 find confidence interval}
+sumCoef<-summary(fit)$coefficients
+sumCoef[1,1]+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[1,2]
+sumCoef[2,1]+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[2,2]
+```
+
+##Question Three
+
+```{r q3}
+rm(list=ls())
+data(mtcars)
+x<-mtcars$wt
+y<-mtcars$mpg
+plot(x,y)
+fit<-lm(y~x)
+summary(fit)$coefficients
+
+sumCoef<-summary(fit)$coefficients
+beta0Range<-sumCoef[1,1]+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[1,2]
+beta0Range
+beta1Range<-sumCoef[2,1]+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[2,2]
+beta1Range
+
+mpgLow<-sumCoef[1,1]+beta1Range[1]*mean(mtcars$wt)
+mpgLow
+```
