@@ -62,9 +62,8 @@ Now do this using the lm function
 ```{r q1 lm fit}
 fit<-lm(y~x)
 summary(fit)$coefficients
-```
 
-```{r q1 find confidence interval}
+##q1 find confidence interval
 sumCoef<-summary(fit)$coefficients
 sumCoef[1,1]+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[1,2]
 sumCoef[2,1]+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[2,2]
@@ -77,6 +76,19 @@ rm(list=ls())
 data(mtcars)
 x<-mtcars$wt
 y<-mtcars$mpg
+
+n<-length(y)
+
+beta1<-cor(y,x)*sd(y)/sd(x)
+beta0<-mean(y)-beta1*mean(x)
+
+# residuals
+e<-y-beta0-beta1*x
+
+# sd around the regression line
+sigma<-sqrt(sum(e^2)/(n-2))
+sigma
+
 plot(x,y)
 fit<-lm(y~x)
 summary(fit)$coefficients
@@ -87,6 +99,69 @@ beta0Range
 beta1Range<-sumCoef[2,1]+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[2,2]
 beta1Range
 
-mpgLow<-sumCoef[1,1]+beta1Range[1]*mean(mtcars$wt)
-mpgLow
+mpgrange<-mean(y)+c(-1,1)*qt(0.975)*sigma/sqrt(n)
+mpgrange
+
 ```
+
+##Question Five
+Consider again the mtcars data set and a linear regression model with mpg as predicted by weight (1,000 lbs). A new car is coming weighing 3000 pounds. Construct a 95% prediction interval for its mpg. What is the upper endpoint?
+
+14.93
+21.25
+-5.77
+__27.57__
+
+```{r q5}
+
+
+attach(mtcars)     # attach the data frame 
+fit.lm = lm(mpg ~ wt)
+# Then we create a new data frame that set the waiting time value.
+
+newdata = data.frame(wt=3)
+# We now apply the predict function and set the predictor variable in the
+# newdata argument. We also set the interval type as "confidence", and use
+# the default 0.95 confidence level.
+
+predict(fit.lm, newdata, interval="prediction") 
+
+detach(mtcars)     # clean up
+
+```
+
+##Question Six
+
+Consider again the mtcars data set and a linear regression model with mpg as
+predicted by weight (in 1,000 lbs). A "short" ton is defined as 2,000 lbs.
+Construct a 95% confidence interval for the expected change in mpg per 1 short
+ton increase in weight. Give the lower endpoint.
+
+-12.973
+-9.000
+-6.486
+4.2026
+
+```{r q6}
+delta<-2*(beta1+c(-1,1)*qt(0.975,df=fit$df)*sumCoef[2,2])
+delta
+```
+
+##Question Eight
+```{r q8}
+c<-2
+xc<-x+c
+fitc<-lm(y~xc)
+fit$coefficients[[1]]-fitc$coefficients[[1]]
+```
+
+##Question Nine
+
+```{r q9}
+# residuals^2 - the numerator
+num<-sum((y-beta0-beta1*x)^2)
+# differences from mean^2 - denominator
+den<-sum((y-mean(y))^2)
+num/den
+```
+
