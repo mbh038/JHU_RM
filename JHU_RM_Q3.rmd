@@ -1,0 +1,91 @@
+---
+title: "JHU_RM_Q3"
+author: "mbh"
+date: "Tuesday, June 16, 2015"
+output: html_document
+---
+
+##Load and inspect data
+
+```{r load data}
+str(mtcars)
+```
+## Question One
+
+Consider the mtcars data set. Fit a model with mpg as the outcome that includes number of cylinders as a factor
+variable and weight as confounder. 
+Give the adjusted estimate for the expected change in mpg comparing 8 cylinders to 4.
+
+-4.256
+-3.206
+-6.071
+33.991
+
+```{r q1}
+fit<-lm(mpg~factor(cyl)+wt,data=mtcars)
+summary(fit)
+fitnf<-lm(mpg~cyl+wt,data=mtcars)
+summary(fitnf)
+```
+
+## Question Three
+
+Consider the mtcars data set. Fit a model with mpg as the outcome that considers number of cylinders as a factor variable and weight as confounder. Now fit a second model with mpg as the outcome model that considers the interaction between number of cylinders (as a factor variable) and weight. Give the P-value for the likelihood ratio test comparing the two models and suggest a model using 0.05 as a type I error rate significance benchmark.InsectSprays
+
+The P-value is small (less than 0.05). So, according to our criterion, we reject, which suggests that the interaction term is not necessary.
+The P-value is larger than 0.05. So, according to our criterion, we would fail to reject, which suggests that the interaction terms is necessary.
+The P-value is small (less than 0.05). Thus it is surely true that there is no interaction term in the true model.
+The P-value is small (less than 0.05). So, according to our criterion, we reject, which suggests that the interaction term is necessary
+The P-value is small (less than 0.05). Thus it is surely true that there is an interaction term in the true model.
+The P-value is larger than 0.05. So, according to our criterion, we would fail to reject, which suggests that the interaction terms may not be necessary.
+
+```{r q3}
+fitcf<-lm(mpg~factor(cyl)+wt,data=mtcars)
+fitint<-lm(mpg~factor(cyl)*wt,data=mtcars)
+
+summary(fitcf)
+summary(fitint)
+```
+
+##Question Four
+
+```{r q4}
+fit4<-lm(mpg ~ I(wt * 0.5) + factor(cyl), data = mtcars)
+fit4
+fit4nf<-lm(mpg ~ I(wt * 1) + factor(cyl), data = mtcars)
+fit4nf
+```
+
+## Question Five
+
+Question 5
+Consider the following data set
+
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+Give the hat diagonal for the most influential point
+
+0.2025
+0.9946
+0.2804
+0.2287
+
+```{r q5}
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+df<-data.frame(x,y)
+
+fit5<-lm(y~x,data=df)
+summary(fit5)
+hatvalues(fit5)
+```
+
+## Question Six
+
+```{r q6}
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+df<-data.frame(x,y)
+fit6<-lm(y~x,data=df)
+dfbeta(fit6)
+```
