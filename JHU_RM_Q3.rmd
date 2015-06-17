@@ -18,7 +18,7 @@ Give the adjusted estimate for the expected change in mpg comparing 8 cylinders 
 
 -4.256
 -3.206
--6.071
+__-6.071__
 33.991
 
 ```{r q1}
@@ -33,21 +33,36 @@ summary(fitnf)
 Consider the mtcars data set. Fit a model with mpg as the outcome that considers number of cylinders as a factor variable and weight as confounder. Now fit a second model with mpg as the outcome model that considers the interaction between number of cylinders (as a factor variable) and weight. Give the P-value for the likelihood ratio test comparing the two models and suggest a model using 0.05 as a type I error rate significance benchmark.InsectSprays
 
 The P-value is small (less than 0.05). So, according to our criterion, we reject, which suggests that the interaction term is not necessary.
+
 The P-value is larger than 0.05. So, according to our criterion, we would fail to reject, which suggests that the interaction terms is necessary.
+
 The P-value is small (less than 0.05). Thus it is surely true that there is no interaction term in the true model.
+
 The P-value is small (less than 0.05). So, according to our criterion, we reject, which suggests that the interaction term is necessary
+
 The P-value is small (less than 0.05). Thus it is surely true that there is an interaction term in the true model.
-The P-value is larger than 0.05. So, according to our criterion, we would fail to reject, which suggests that the interaction terms may not be necessary.
+
+__The P-value is larger than 0.05. So, according to our criterion, we would fail to reject, which suggests that the interaction terms may not be necessary.__
 
 ```{r q3}
 fitcf<-lm(mpg~factor(cyl)+wt,data=mtcars)
-fitint<-lm(mpg~factor(cyl)*wt,data=mtcars)
+fitint<-update(fitcf, mpg~factor(cyl)+factor(cyl)*wt,data=mtcars)
+anova(fitcf,fitint)
 
-summary(fitcf)
-summary(fitint)
 ```
 
 ##Question Four
+
+Consider the mtcars data set. Fit a model with mpg as the outcome that includes number of cylinders as a factor variable and weight inlcuded in the model as
+
+lm(mpg ~ I(wt * 0.5) + factor(cyl), data = mtcars)
+How is the wt coefficient interpretted?
+
+The estimated expected change in MPG per half ton increase in weight for for a specific number of cylinders (4, 6, 8).        		
+The estimated expected change in MPG per half ton increase in weight.			
+The estimated expected change in MPG per half ton increase in weight for the average number of cylinders.			
+__The estimated expected change in MPG per one ton increase in weight for a specific number of cylinders (4, 6, 8).__		
+The estimated expected change in MPG per one ton increase in weight.
 
 ```{r q4}
 fit4<-lm(mpg ~ I(wt * 0.5) + factor(cyl), data = mtcars)
@@ -66,7 +81,7 @@ y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
 Give the hat diagonal for the most influential point
 
 0.2025
-0.9946
+__0.9946__
 0.2804
 0.2287
 
@@ -81,6 +96,17 @@ hatvalues(fit5)
 ```
 
 ## Question Six
+
+Consider the following data set
+
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+Give the slope dfbeta for the point with the highest hat value.
+
+-.00134        		
+__-134__	
+-0.378			
+0.673
 
 ```{r q6}
 x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
