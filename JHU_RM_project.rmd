@@ -12,14 +12,13 @@ output: pdf_document
 library(dplyr)
 data(mtcars)
 str(mtcars)
-#make an am factor column
-amf<-factor(mtcars$am)
-mtwide<-mutate(mtcars,amf)
+#make  am a factor column
+mtcars$am<-as.factor(mtcars$am)
 ```
 ```{r gpm plot}
 library(ggplot2)
-mtwide$gpm<-100/mtwide$mpg
-g<-ggplot(data=mtwide,aes(x=wt,y=gpm,colour=amf))+
+mtcars$gpm<-100/mtcars$mpg
+g<-ggplot(data=mtcars,aes(x=wt,y=gpm,colour=am))+
         geom_point()+
         geom_smooth(method=lm)+
         #facet_wrap(~amf,shrink=FALSE)+
@@ -27,10 +26,10 @@ g<-ggplot(data=mtwide,aes(x=wt,y=gpm,colour=amf))+
 g
 ```
 ```{r regression of mpg on just am}
-lm1<-lm(gpm~factor(amf),data=mtwide)
+lm1<-lm(gpm~factor(am),data=mtcars)
 lm1
 ```
-So if all the other variates were randomly assigneed to the 2 transmission groups we coulc conclude that automatic cars had a higher mpg than manual cars. This is physically plausible.
+So if all the other variates were randomly assigned to the 2 transmission groups we coulc conclude that automatic cars had a higher mpg than manual cars. This is physically plausible.
 
 
 
