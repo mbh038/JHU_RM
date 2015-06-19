@@ -1,20 +1,63 @@
 ---
-title: "JHU_RM project"
+title: "Does transmission type affect car fuel economy"
 author: "mbh038"
 date: "Monday, June 15, 2015"
-output: pdf_document
+output: html_document
 ---
+##Executive Summary
 
-"Is an automatic or manual transmission better for MPG"
-"Quantify the MPG difference between automatic and manual transmissions"
+We perform an anlysis to answer the question of the title, using the mtcars data set, and using gallons per 100 miles (gpm) as an inverse metric of fuel economy, rather then mpg.  Simple physics considerations suggest that many factors might affect fuel economy, besides transmission type and correlation of several factors is indeed confirmed by an exploratory pairs plot. An initial regression of gpm with transmission type, displacement, gross horsepower, weight and time to reach a quarter mile distance suggested that only weight was a significant predictor of fuel economy. A subsequent regression of fuel economy on ony weight and transmission type confirmed this. The analysis cannot exclude the possibility that transmission type makes no difference to fuel economy (P=0.2)
+
+## Load the data
 
 ```{r load data}
 library(dplyr)
+library(ggplot2)
 data(mtcars)
 str(mtcars)
-#make  am a factor column
-mtcars$am<-as.factor(mtcars$am)
 ```
+## Pre-processing of the data
+
+To determine whether the transmission type of the cars has a significant effect on their fuel economy, we first express the latter as "gallons per 100 miles" variable, named gpm,  which is an inverse measure to mpg that is commonly used in many countries. It is more likely than mpg to have a linear relationship with factors affecting fuel economy, and so is a more suitable input to a linear regression analysis. We also convert the transmission type column to a factor type.
+
+```{r data preparation}
+for (i in c(2,8,9,10,11)){mtcars[,i]=factor(mtcars[,i])}
+mtcars$gpm<-100/mtcars$mpg
+```
+A pairs plot was created for those variables that on physical grounds we suspect might influence the fuel economy of the cars, that is disp (displacement), hp (gross horsepower), wt (weight), qsec (time to reach a quarter mile distance)
+
+```{r pairs plot}
+pairs(mtcars[,-c(1,2,5,8,9,10,11)])
+```
+This suggests that all the above mentioned variables are correlated with fuel economy.
+hence, in a first regression analysis, all will first be inclued as regressors,together with the transmission type.
+
+##First regression analysis
+```{r regression 1 - many regressors}
+fit<-lm(gpm~factor(am)+wt+disp+qsec+hp-1,data=mtcars)
+summary(fit)
+confint(fit)
+```
+The intercept was excluded in the above analysis, so each of the estimate values in the summary above represent the amount by which the fuel economy, as expressed by gpm, will change, per unit change in the variate with all the other variates included in the regression being held constant. of all the continuous variables, ony weight appears to be statisitically significant factor.It is the only one with a P value less than 0.05, and the only for which the confidence interval does not straddles zero.
+
+##Second regresssion analysis
+Given the result above, we perform a second regression, including only transmission type and weight as regressors, with gpm as the response.
+
+```{r - include only weight and transmission type}
+fit<-lm(gpm~factor(am)+wt,data=mtcars)
+summary(fit)
+confint(fit)
+```
+This result show that we cannot infer from thse data that tranmission type affects feul economy, while vehicle weight certainly does. The estimated gpm value for manual transmission at zero ocar weight is 0.483 more than for automatic transmissions, but with a P value of 0.2 we cannot exclude the possibility that this diofference is zero. Indeed we see this also from the confidence interval for manual transmission. It straddles zero, meaning that we cannot be 95% confident that the fuel economy is greater or less for manual transmision compared to automatic transmission.
+
+```{r check for validity of anylisis}
+par(mfrow=c(2,2))
+plot(fit)
+```
+There is no systematic variation in the residuals, and thr qq plot is linear, suggesting that the data set is normally distributed around the fit, and hence that the above analysis is valid.
+
+
+
 ```{r gpm plot}
 library(ggplot2)
 mtcars$gpm<-100/mtcars$mpg
@@ -24,27 +67,4 @@ g<-ggplot(data=mtcars,aes(x=wt,y=gpm,colour=am))+
         #facet_wrap(~amf,shrink=FALSE)+
         labs(x = "Weight / 1000 lb",y = "Gallons per 100 miles")
 g
-```
-```{r regression of mpg on just am}
-lm1<-lm(gpm~factor(am),data=mtcars)
-lm1
-```
-So if all the other variates were randomly assigned to the 2 transmission groups we coulc conclude that automatic cars had a higher mpg than manual cars. This is physically plausible.
-
-
-
-##Play
-```{r q4 LIB 8 exercises}
-data(mtcars)
-t.test(mtcars$mpg)
-```
-```{r q5 LIB 8 exercises}
-qt(0.975,8)*1/3
-```
-```{r q7 LIB 8 exercises}
-library(dplyr)
-mt4<-filter(mtcars,cyl==4)
-mt6<-filter(mtcars,cyl==6)
-t.test(mt4$mpg,mt6$mpg,pairs=FALSE,var.equal=TRUE)
-#The interval is above zero, suggesting 4 is better than 6 in the terms of MPG.
 ```
