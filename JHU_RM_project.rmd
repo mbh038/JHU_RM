@@ -1,70 +1,76 @@
 ---
-title: "Does transmission type affect car fuel economy"
-author: "mbh038"
+title: "Does transmission type affect car fuel economy?"
+author: "Michael Hunt"
 date: "Monday, June 15, 2015"
-output: html_document
+output: pdf_document
 ---
 ##Executive Summary
+We perform an analysis to answer the question of the title, using the mtcars data set, and using gallons per 100 miles (gpm) as an inverse metric of fuel economy.  Simple physics suggests that many factors might affect fuel economy, besides transmission type. Correlation of several factors is indeed confirmed by an exploratory pairs plot. An initial regression of gpm on several explanatory variables suggests that only weight is a significant predictor of fuel economy. A subsequent regression of fuel economy on weight and transmission type confirms this,and, further, finds no evidence that transmission type makes any difference to fuel economy (P=0.2)
 
-We perform an anlysis to answer the question of the title, using the mtcars data set, and using gallons per 100 miles (gpm) as an inverse metric of fuel economy, rather then mpg.  Simple physics considerations suggest that many factors might affect fuel economy, besides transmission type and correlation of several factors is indeed confirmed by an exploratory pairs plot. An initial regression of gpm with transmission type, displacement, gross horsepower, weight and time to reach a quarter mile distance suggested that only weight was a significant predictor of fuel economy. A subsequent regression of fuel economy on ony weight and transmission type confirmed this. The analysis cannot exclude the possibility that transmission type makes no difference to fuel economy (P=0.2)
-
-## Load the data
-
-```{r load data}
-library(dplyr)
-library(ggplot2)
-data(mtcars)
-str(mtcars)
-```
 ## Pre-processing of the data
+The data are loaded in from R. To determine whether the transmission type of the cars has a significant effect on their fuel economy, we first express the latter as "gallons per 100 miles" variable, named gpm,  where $\mathrm{gpm}=\frac{100}{\mathrm{mpg}}$. This is an inverse measure to mpg that is commonly used in many countries. It is more likely than mpg to have a linear relationship with factors affecting fuel economy, and so is a more suitable input to a linear regression analysis. 
 
-To determine whether the transmission type of the cars has a significant effect on their fuel economy, we first express the latter as "gallons per 100 miles" variable, named gpm,  which is an inverse measure to mpg that is commonly used in many countries. It is more likely than mpg to have a linear relationship with factors affecting fuel economy, and so is a more suitable input to a linear regression analysis. We also convert the transmission type column to a factor type.
-
-```{r data preparation}
-for (i in c(2,8,9,10,11)){mtcars[,i]=factor(mtcars[,i])}
+```{r load data,echo=FALSE,warning=FALSE,message=FALSE}
+library(dplyr); library(ggplot2); library(GGally)
+data(mtcars)
+```
+```{r data preparation,echo=FALSE}
 mtcars$gpm<-100/mtcars$mpg
 ```
-A pairs plot was created for those variables that on physical grounds we suspect might influence the fuel economy of the cars, that is disp (displacement), hp (gross horsepower), wt (weight), qsec (time to reach a quarter mile distance)
+A pairs plot was created for those variables that on physical grounds we suspect might influence the fuel economy of the cars, that is disp (displacement), hp (gross horsepower), wt (weight), qsec (time to reach a quarter mile distance).This is shown in the appendix.
 
-```{r pairs plot}
-pairs(mtcars[,-c(1,2,5,8,9,10,11)])
-```
-This suggests that all the above mentioned variables are correlated with fuel economy.
-hence, in a first regression analysis, all will first be inclued as regressors,together with the transmission type.
+This suggests that all the above mentioned variables except qsec are correlated with fuel economy and could have a linear relation with it.
+In a first regression analysis, all will first be included as explanatory variables,together with the transmission type.
 
 ##First regression analysis
 ```{r regression 1 - many regressors}
+for (i in c(2,8,9,10,11)){mtcars[,i]=factor(mtcars[,i])}
 fit<-lm(gpm~factor(am)+wt+disp+qsec+hp-1,data=mtcars)
-summary(fit)
-confint(fit)
+round(cbind(summary(fit)$coef,confint(fit)),3)
 ```
-The intercept was excluded in the above analysis, so each of the estimate values in the summary above represent the amount by which the fuel economy, as expressed by gpm, will change, per unit change in the variate with all the other variates included in the regression being held constant. of all the continuous variables, ony weight appears to be statisitically significant factor.It is the only one with a P value less than 0.05, and the only for which the confidence interval does not straddles zero.
+The intercept was excluded in the above analysis, so each of the estimate values in the summary above represent the amount by which the fuel economy, as expressed by gpm, will change, per unit change in the variate with all the other variates included in the regression being held constant. The p-value of the F-statistic shows that the model as a whole has predictive power, but the p-values and confidence intervals for the continuous variables suggest that weight appears to be the only statistically significant factor in predicting fuel economy. It is the only one with a P value less than 0.05, and the only one for which the confidence interval does not straddle zero.
 
-##Second regresssion analysis
-Given the result above, we perform a second regression, including only transmission type and weight as regressors, with gpm as the response.
+##Calculate tolerances
+The lack of significance of many of the variables indicated above may be becuase of multicollinearity. To further check this, we regress each one onto the other variables used above and calculate the tolerance ($T=1-R^2)$ and and variable inflation factor $V=\frac{1}{T}$. Various threshold values are used for these in the literature, but we shall take $T<0.2$ and hence $V>5$ as a threshold indicator of collinearity 
+```{r calculate tolerances}
+dispV<-1-summary(lm(disp~factor(am)+wt+hp+qsec,data=mtcars))$r.squared;
+hpV<-1-summary(lm(hp~factor(am)+wt+disp+qsec,data=mtcars))$r.squared;
+qsecV<-1-summary(lm(qsec~factor(am)+wt+disp+hp,data=mtcars))$r.squared;
+tolerance<-data.frame(c("disp","hp","qsec"),round(c(dispV,hpV,qsecV),3))
+colnames(tolerance)<-c("Predictor","VIF");tolerance
+```
+We conclude that hp and disp should not be used as predictors since they are collinear with weight, but that inclusion of qsec will not affect regression results on weight. This is consistent with the low correlation between qsec and weight found earlier. However, since the p-value for qsec is high $>0.05$ , we leave it out anyway.
+
+##Second regression analysis
+Given the result above, we perform a second regression, including only transmission type and weight as explanatory variables, with gpm as the response.
 
 ```{r - include only weight and transmission type}
 fit<-lm(gpm~factor(am)+wt,data=mtcars)
-summary(fit)
-confint(fit)
+round(cbind(summary(fit)$coef,confint(fit)),3)
 ```
-This result show that we cannot infer from thse data that tranmission type affects feul economy, while vehicle weight certainly does. The estimated gpm value for manual transmission at zero ocar weight is 0.483 more than for automatic transmissions, but with a P value of 0.2 we cannot exclude the possibility that this diofference is zero. Indeed we see this also from the confidence interval for manual transmission. It straddles zero, meaning that we cannot be 95% confident that the fuel economy is greater or less for manual transmision compared to automatic transmission.
+This result shows that we cannot infer from these data that transmission type affects fuel economy, while vehicle weight certainly does. The estimated gpm value for manual transmission at zero car weight is 0.483 more than for automatic transmissions, but with a P value of 0.2 we cannot exclude the possibility that this difference is zero. Indeed we see this also from the confidence interval for manual transmission. It straddles zero, meaning that we cannot be 95% confident that fuel economy is greater or less for manual transmision than it is for automatic transmission.
 
-```{r check for validity of anylisis}
-par(mfrow=c(2,2))
-plot(fit)
+##Check for validity of analysis
+We check for independence, heteroskedacticity and normality of the data by plotting residuals vs fitted values (should be scattered evenly around the zero line, with no obvious pattern, and a qq plot - should be astraight line). See appendix.The conditions for the validity of the analysis are found to be well met, although there is one outlier - the Chrysler Imperial - which may have undue influence.
+
+##Appendices
+
+###Pairs plot and correlation values
+
+```{r pairs plot,echo=FALSE,fig.height= 4,fig.width=7}
+#pairs(mtcars[,-c(2,5,8,9,10,11)])
+ggpairs(mtcars[,c("gpm","wt","disp","qsec","hp","drat")])
 ```
-There is no systematic variation in the residuals, and thr qq plot is linear, suggesting that the data set is normally distributed around the fit, and hence that the above analysis is valid.
 
+###Check validity of analysis
 
-
-```{r gpm plot}
-library(ggplot2)
-mtcars$gpm<-100/mtcars$mpg
-g<-ggplot(data=mtcars,aes(x=wt,y=gpm,colour=am))+
-        geom_point()+
-        geom_smooth(method=lm)+
-        #facet_wrap(~amf,shrink=FALSE)+
-        labs(x = "Weight / 1000 lb",y = "Gallons per 100 miles")
-g
+```{r check for validity of analysis,echo=FALSE,fig.height= 4,fig.width=7}
+par(mfrow=c(1,2))
+#plot(fit)
+plot(fit$fitted.values,fit$residuals,xlab="fitted values",ylab="residuals",main="Residual Plot")
+abline(0,0,col="red")
+qqnorm(resid(fit))
 ```
+
+
+
