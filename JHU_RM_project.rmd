@@ -1,11 +1,11 @@
 ---
 title: "Does transmission type affect car fuel economy?"
 author: "Michael Hunt"
-date: "Monday, June 15, 2015"
+date: "Saturday, June 20, 2015"
 output: pdf_document
 ---
 ##Executive Summary
-We analyse the mtcars data set to answer the question of the title, using gallons per 100 miles (gpm) as an inverse metric of fuel economy.  Simple physics suggests that many factors might affect fuel economy, besides transmission type. Correlation of several factors is indeed confirmed by an exploratory pairs plot. An initial regression of gpm on several explanatory variables suggests that among continuous variables, only weight is a significant predictor of fuel economy. A subsequent regression of fuel economy on weight and transmission type confirms this, and, further, finds evidence at the 95% confidence level that manual transmission cars require a mean value of 0.7 gallons more fuel per 100 miles than automatic transmission cars, all else being equal.
+We analyse the mtcars data set to answer the question of the title, using gallons per 100 miles (gpm) as an inverse metric of fuel economy.  Simple physics suggests that many factors might affect fuel economy, besides transmission type. Correlation of several factors is indeed confirmed by an exploratory pairs plot. An initial regression of gpm on several explanatory variables suggests that among continuous variables, only weight is a significant predictor of fuel economy. A subsequent regression of fuel economy on weight and transmission type confirms this, and, further, finds evidence at the 95% confidence level that manual transmission cars require more fuel for the same distance travelled than automatic transmission cars, with a mean value of $0.7 \pm 0.3$ gallons more fuel per 100 miles travelled than is the case for automatic transmission cars, all else being equal.This is equivalent to about 14 mpg fewer.
 
 ## Pre-processing and exploratory analysis of the data
 The data are loaded in from R. __The data for the Chrysler Imperial are removed from the set and the subsequent analysis, since a preliminary analysis showed this to be an outlier, with excessive influence on regression results.__ To determine whether the transmission type of the cars has a significant effect on their fuel economy, we first express the latter as "gallons per 100 miles" variable, named gpm,  where $\mathrm{gpm}=\frac{100}{\mathrm{mpg}}$. This is an inverse measure to mpg that is commonly used in many countries. It is more likely than mpg to have a linear relationship with factors affecting fuel economy, and so is a more suitable input to a linear regression analysis. 
@@ -18,10 +18,7 @@ mtcarsno<-mtcars[-17,]
 ```{r data preparation,echo=FALSE}
 mtcarsno$gpm<-100/mtcarsno$mpg
 ```
-A pairs plot was created for those variables that on physical grounds we suspect might influence the fuel economy of the cars, that is disp (displacement), hp (gross horsepower), wt (weight), qsec (time to reach a quarter mile distance). This is shown in the appendix as Figure 1.
-
-This suggests that all the above mentioned variables except qsec are correlated with fuel economy and could have a linear relation with it.
-In a first regression analysis, all will first be included as explanatory variables, together with the transmission type.
+A pairs plot was created for those variables that on physical grounds we suspect might influence the fuel economy of the cars, that is disp (displacement), hp (gross horsepower), wt (weight) and qsec (time to reach a quarter mile distance). This is shown in the appendix as Figure 1. It suggests that all the above mentioned variables except qsec are correlated with fuel economy and could have a linear relation with it.In a first regression analysis, all will first be included as explanatory variables, together with the transmission type.
 
 ##First regression analysis
 ```{r regression 1 - many regressors}
@@ -49,7 +46,7 @@ Given the result above, we perform a second regression, including only transmiss
 fitno<-lm(gpm~factor(am)+wt,data=mtcarsno)
 round(cbind(summary(fitno)$coef,confint(fitno)),3)
 ```
-This result suggests at the 95% confidence level (ie p<0.05) that besides weight, transmission type does affect fuel economy, with manual cars requiring a mean value of 0.7 gallons of fuel per 100 miles more than automatic cars, all else being equal. Figure 2 in the appendix illustrates this. 
+This result suggests at the 95% confidence level (ie p<0.05) that besides weight, transmission type does affect fuel economy, with manual cars requiring a mean value of $0.7\pm 0.3$ more gallons of fuel per 100 miles than automatic cars, all else being equal, which is equivalent to 14 mpg less. Figure 2 in the appendix illustrates this. 
 
 ##Check for validity of analysis
 We check for independence, heteroskedacticity and normality of the data by plotting residuals vs fitted values (should be scattered evenly around the zero line, with no obvious pattern, and a qq plot - should be astraight line). See appendix Figure 3. The conditions for the validity of the analysis are found to be well met, for the data set in which one outlier - the Chrysler Imperial - was removed. This outlier can be seen in Figure 4.
