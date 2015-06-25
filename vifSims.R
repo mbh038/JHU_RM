@@ -32,7 +32,7 @@ rgp1 <- function(){
 
 # Regressor generation process 2.
 rgp2 <- function(){
-  print("Processing. Please wait.")
+  print("Processing. Please wait.")1
   # number of samples per simulation
   n <- 100
   # number of simulations

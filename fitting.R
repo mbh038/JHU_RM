@@ -19,6 +19,7 @@ simbias <- function(seed=8765){
   }
   # Point D
   sapply(1:150, f)
+  
 }
 
 # Illustrate the effect of bogus regressors on residual squared error.
