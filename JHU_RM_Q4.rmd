@@ -10,13 +10,12 @@ Consider the space shuttle data ?shuttle in the MASS library. Consider modeling 
 
 ```{r q1 shuttle}
 library(MASS)
+load(shuttle)
 str(shuttle)
 shuttle$auto <- as.numeric(shuttle$use=="auto")
-fit <- glm(auto ~ wind,  binomial,  shuttle)
-
-
-table(shuttle$auto,shuttle$wind)
-
+model1 <- glm(auto ~ wind-1,  family=binomial,  data=shuttle)
+summary(model1)
+exp(model1$coef[1]-model1$coef[2])
 ```
 
 
@@ -26,8 +25,22 @@ table(shuttle$auto,shuttle$wind)
 Consider the previous problem. Give the estimated odds ratio for autolander use comparing head winds (numerator) to tail winds (denominator) adjusting for wind strength from the variable magn.
 
 ```{r q2 shuttle}
-fit<-glm(formula=use~wind*magn,family="binomial",data=shuttle)
-summary(fit)
-exp(-0.03201)
-exp(fit$coef[2])
+shuttle$magn <- as.numeric(shuttle$magn)
+model2<-glm(auto~wind+magn-1,family="binomial",data=shuttle)
+summary(model2)
+exp(model2$coef[1]-model2$coef[2])
+```
+
+##Question Three
+
+If you fit a logistic regression model to a binary variable, for example use of the autolander,
+then fit a logistic regression model for one minus the outcome (not using the autolander) 
+what happens to the coefficients?
+
+```{r q3 shuttle}
+model1 <- glm(auto ~ wind,  family=binomial,  data=shuttle)
+summary(model1)
+shuttle$noauto<- as.numeric(shuttle$use=="noauto")
+model3<-glm(noauto~ wind,family="binomial",data=shuttle)
+summary(model3)
 ```
