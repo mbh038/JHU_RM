@@ -109,7 +109,7 @@ xMat <- cbind(1, x, splineTerms)
 yhat <- predict(lm(y ~ xMat - 1))
 plot(x, y, frame = FALSE, pch = 21, bg = "lightblue", cex = 2)
 lines(x, yhat, col = "red", lwd = 2)
-(yhat[11]-yhat[6])/(x[11]-x[6])
+(yhat[11]-yhat[6])/(x[11]-x[6]) # =beta1 + beta2!
 ```
 
 Copied code from Brian's example in Hodgepodge lecture 03_ 04_ a Fitting functions
