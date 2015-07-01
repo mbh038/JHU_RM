@@ -10,7 +10,7 @@ Consider the space shuttle data ?shuttle in the MASS library. Consider modeling 
 
 ```{r q1 shuttle}
 library(MASS)
-load(shuttle)
+#load(shuttle)
 str(shuttle)
 shuttle$auto <- as.numeric(shuttle$use=="auto")
 model1 <- glm(auto ~ wind-1,  family=binomial,  data=shuttle)
