@@ -44,3 +44,82 @@ shuttle$noauto<- as.numeric(shuttle$use=="noauto")
 model3<-glm(noauto~ wind,family="binomial",data=shuttle)
 summary(model3)
 ```
+
+##Question Four
+
+Consider the insect spray data InsectSprays. Fit a Poisson model using spray as a factor level. Report the estimated relative rate comapring spray A (numerator) to spray B (denominator).
+
+0.321
+0.136
+__0.9457__
+-0.056
+
+See slides 20-23 of lecture on count outcomes
+
+#lecture example - hits to Jeff Leek's website
+```{r jleek example}
+# this doesn't work yet!
+download.file("https://dl.dropboxusercontent.com/u/7710864/data/gaData.rda",destfile="./data/gaData.rda")
+load("./data/gaData.rda")
+gaData$julian <- julian(gaData$date)
+head(gaData)
+```
+
+```{r q4 - poisson on InsectSpray}
+data(InsectSprays)
+str(InsectSprays)
+model1<-glm(count ~ spray,family="poisson",data=InsectSprays)
+summary(model1)
+```
+##Question Five
+
+# coefficients unchanged if time scale changed eg by factor 10
+
+```{r q5 - log10 additional offset}
+data(InsectSprays)
+str(InsectSprays)
+InsectSprays$t<-2
+model1<-glm(count ~ spray,family="poisson",offset=log(t+1),data=InsectSprays)
+summary(model1)
+model2<-glm(count ~ spray,family="poisson",offset=log(t+1)+log(10),data=InsectSprays)
+summary(model2)
+```
+
+##Question Six
+
+Consider the data
+
+x <- -5:5
+y <- c(5.12, 3.93, 2.67, 1.87, 0.52, 0.08, 0.93, 2.05, 2.54, 3.87, 4.97)
+
+Using a knot point at 0, fit a linear model that looks like a hockey stick with two lines meeting at x=0. Include an intercept term, x and the knot point term. What is the estimated slope of the line after 0?
+
+2.037
+-1.024
+__1.013__
+-0.183
+
+```{r q6 knot point}
+x <- -5:5
+y <- c(5.12, 3.93, 2.67, 1.87, 0.52, 0.08, 0.93, 2.05, 2.54, 3.87, 4.97)
+plot(x,y)
+knot0=0
+splineTerms <- sapply(knot0, function(knot) (x > knot) * (x - knot))
+xMat <- cbind(1, x, splineTerms)
+yhat <- predict(lm(y ~ xMat - 1))
+plot(x, y, frame = FALSE, pch = 21, bg = "lightblue", cex = 2)
+lines(x, yhat, col = "red", lwd = 2)
+(yhat[11]-yhat[6])/(x[11]-x[6]) # =beta1 + beta2!
+```
+
+Copied code from Brian's example in Hodgepodge lecture 03_ 04_ a Fitting functions
+slide 3
+```{r example}
+n <- 500; x <- seq(0, 4 * pi, length = n); y <- sin(x) + rnorm(n, sd = .3)
+knots <- seq(0, 8 * pi, length = 20); 
+splineTerms <- sapply(knots, function(knot) (x > knot) * (x - knot))
+xMat <- cbind(1, x, splineTerms)
+yhat <- predict(lm(y ~ xMat - 1))
+plot(x, y, frame = FALSE, pch = 21, bg = "lightblue", cex = 2)
+lines(x, yhat, col = "red", lwd = 2)
+```
